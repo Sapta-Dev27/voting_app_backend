@@ -1,6 +1,5 @@
 const mongoose = require("mongoose")
 
-
 const userSchema = new mongoose.Schema({
   userName : {
     type : String ,
@@ -15,15 +14,7 @@ const userSchema = new mongoose.Schema({
     type : String ,
     required : true ,
     unique : true ,
-    toLowerCase : true 
-  },
-  userMobile : {
-    type : String ,
-    required : true ,
-    unique : true 
-  },
-  userAddress : {
-    type : String 
+    lowerCase : true 
   },
   userAdharCard : {
     type : String ,
@@ -32,19 +23,16 @@ const userSchema = new mongoose.Schema({
   },
   userPassword : {
     type : String ,
-    unique : true ,
     required : true 
   },
   userRole : {
     type : String ,
-    unique : true ,
     enum : ["admin" , "user"],
-  },
-  isVoted : {
-    type : Boolean ,
-    unique : true 
+    default : "user"
   }
+  
 }) 
 
 
-const user = mongoose.model("User" , userSchema)
+const User = mongoose.model("User" , userSchema)
+module.exports = User
