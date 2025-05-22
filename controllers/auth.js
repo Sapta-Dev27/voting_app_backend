@@ -102,6 +102,7 @@ const userLogin = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "User is logged in successfully",
+        accessToken: accessToken,
         user: checkUser
       })
     }
@@ -121,4 +122,183 @@ const userLogin = async (req, res) => {
     })
   }
 }
-module.exports = { userRegister, userLogin }
+
+const userChangePassword = async (req, res) => {
+  try {
+
+    // take the user id from the token //
+    const userID = req.userInfo.id;
+
+    // take the old password and new password from the user //
+
+
+    const { oldPassword, newPassword } = req.body;
+
+    // check if the user with the given id exists or not //
+    const checkUser = await User.findById(userID);
+    if (!checkUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User Not Found"
+      })
+    }
+
+    // check if the user with the given old password exists or not //
+    const usercheckPassword = await bycryptjs.compare(oldPassword, checkUser.userPassword)
+    if (!usercheckPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Old Password is not correct'
+      }
+      )
+    }
+
+    //hash the new password and save it to the database //
+    const salt = await bycryptjs.genSalt(10);
+    const hashedPassword = await bycryptjs.hash(newPassword, salt);
+
+    checkUser.userPassword = hashedPassword;
+    await checkUser.save();
+
+    if (checkUser) {
+      return res.status(200).json({
+        success: true,
+        message: "Password is changed successfully",
+        user: checkUser
+      })
+    }
+    else {
+      return res.status(400).json({
+        success: false,
+        message: "Password is not changed"
+      })
+    }
+  }
+  catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    })
+  }
+}
+
+const changeUserName = async (req, res) => {
+  try {
+    try {
+      
+      // take the user id from the token //
+      const userID = req.userInfo.id;
+
+      // take the new username from the user //
+      const { newuserName } = req.body;
+
+      // check if the user with the given id exists or not //
+      const checkUser = await User.findById(userID);
+      if (!checkUser) {
+        return res.status(400).json({
+          success: false,
+          message: "User Not Found"
+        })
+      }
+
+      // check if the user with the given username exists or not //
+      const checkUserName = await User.findOne({ userName: newuserName })
+
+      if (checkUserName) {
+        return res.status(400).json({
+          success: false,
+          message: "User with the given username already exists"
+        })
+      }
+
+       //save the new username to the database //
+      checkUser.userName = newuserName;
+
+      await checkUser.save() ;
+
+      return res.status(200).json({
+        success : true ,
+        message : "Username is changed successfully",
+      })
+    }
+    catch (error) {
+      console.log(error);
+      return res.status(400).json({
+        success: false,
+        message: "Username is not changed"
+      })
+    }
+  }
+  catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error"
+    })
+  }
+}
+
+const userChangeEmail = async(req,res)=> {
+    try {
+      try {
+        // take the user id from the token //
+         const userId = req.userInfo.id ;
+
+         // take the new email from the user //
+         const {newUserEmail} = req.body ;
+          
+         // check if the user with the given id exists or not //
+         const checkUser = await User.findById(userId);
+
+         
+
+         if(!checkUser) {
+          return res.status(400).json({
+            success : false ,
+            message : "User Not Found"
+          })
+         }
+         
+         //check the new email is already exists or not //
+         const checkUserEmail = await User.findOne({userEmail : newUserEmail})
+
+         if ( checkUserEmail) {
+          return res.status(400).json({
+            success : false ,
+            message : "User with the given email already exists"
+          })
+         }
+          
+
+         //save the new email to the database //
+         checkUser.userEmail = newUserEmail;
+
+         await checkUser.save();
+
+         return res.status(200).json({
+          success : true ,
+          message : "Email is changed successfully",
+         })
+      }
+      catch (error) {
+        console.log(error);
+        return res.status(400).json({
+          success : false ,
+          message : "Email is not changed"
+        })
+      }
+    }
+    catch(error) {
+      console.log(error);
+      return res.status(500).json({
+        success: false,
+        message: "Internal Server Error"
+      })
+    }
+}
+
+
+
+module.exports = { userRegister, userLogin, userChangePassword , userChangeEmail , changeUserName}
+
